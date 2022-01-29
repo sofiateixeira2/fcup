@@ -1,0 +1,263 @@
+
+Pesquisa em DFS
+
+
+daa025 - contar componentes conexas
+   
+   define: max
+
+   global:
+     int n;
+     bool adj[max][max], visited[max];
+
+   void dfs(int v) {
+     visited[v] = true;
+     for(int i = 1; i <= n; i++)
+       if(adj[v][i] && !visited[i])
+         dfs(i);
+   }
+
+   main:
+     ler valores para adj[a][b] = adj[b][a] = true;
+     int count = 0;
+     for(int i = 1; i <= n; i++) {
+       if(!visited[i]) {
+         count++;
+         dfs(i);
+       }
+     }
+
+
+daa026 - descobrir componente conexa maior
+
+   define: max, ndirs (depende do numero de direções)
+
+   global:
+     int incx[ndirs];
+     int incy[ndirs];
+     int rows, cols, c = 0;
+     char m[max][max];
+     bool visited[max][max];
+     
+   void dfs(int y, int x) {
+     if(y < 0 || x < 0 || y >= rows || x >= cols) return;
+     if(visited[y][x] || m[y][x] != FILL) return;
+     c++;
+     visited[y][x] = true;
+     for(int i = 0; i < ndirs; i++)
+       dfs(y+incy[i], x+incx[i]);
+   }
+
+   main:
+     for(int i = 0; i < rows; i++) {
+       cin >> m[i];
+     cmax = 0;
+     for(int i = 0; i < rows; i++)
+       for(int j = 0; j < cols; j++) {
+         if(m[i][j] == '#' && !visited[i][j]) {
+           dfs(i, j);
+           if(c > cmax) cmax = c;
+           c = 0;
+         }
+       }
+     }
+
+
+daa027 - ver se grafo é bipartido
+
+   define: max
+    
+   global:
+     int nos;
+     bool adj[max][max];
+     bool visited[max];
+     bool f = true;
+     int colorarr[max];
+
+   void dfs(int v, int color) {
+     visited[v] = true;
+     colorarr[v] = color*(-1);
+     for(int i = 1; i <= nos; i++) {
+       if(visited[i] && colorarr[i] == colorarr[v] && adj[v][i]) {
+         f = false;
+         return;
+       }
+       if(!visited[i] && adj[v][i])
+         dfs(i, colorarr[v]);
+     }
+   }
+
+   main:
+     ler valores para adj[a][b] = adj[b][a] = true;
+     dfs(1, -1);
+     cout << (f ? "sim" : "nao") << "\n";
+     f = true;
+
+
+daa029 - ordenação topológica
+
+-
+
+
+
+------------------------------------------------------------------------
+
+Pesquisa em BFS
+
+
+daa030 - distancia minima entre dois pontos
+
+-
+
+
+daa031 -
+
+-
+
+
+
+------------------------------------------------------------------------
+
+Detectar ciclos - grafo dirigido
+
+   define: max
+
+   global:
+     int nos, flag = 0;
+     int color[max];
+     int adj[max][max];
+
+   void dfs(int v) {
+     color[v] = GREY;
+     for(int i = 1; i <= n; i++) {
+       if(adj[v][i]) {
+         if(color[i] == GREY)
+           flag++;
+         else if(color[i] == WHITE)
+           dfs(i);
+       }
+     }
+     color[v] = BLACK;
+   }
+
+   main:
+     ler valores para adj[a][b] = true;
+     for(int i = 1; i <= n; i++) {
+       if(color[i] == WHITE)
+         dfs(i);
+     }
+
+     if(flag != 0) cout << "Ciclo encontrado\n";
+     else cout << "Sem ciclos\n";
+
+
+
+-----------------------------------------------------------------------
+
+Pontos de Articulação
+
+   define: max
+
+   global:
+     int n, ind = 1;
+     bool adj[MAX][MAX], inS[MAX];
+     int num[MAX], low[MAX];
+     stack<int> s;
+
+   void dfs(int v) {
+     num[v] = low[v] = ind;
+     ind++;
+     s.push(v);
+     inS[v] = true;
+
+     for(int i = 1; i <= n; i++) {
+       if(adj[v][i]) {
+         if(num[i] == 0) {
+           dfs(i);
+           low[v] = min(low[v], low[i]);
+           if(low[i] >= num[v])
+             cout << v << " - ponto de articulacao\n";
+         } else if(inS[i]) low[v] = min(low[v], num[i]);
+       }
+     }
+     s.pop();
+     inS[v] = false;
+   }
+
+   main:
+     ler valores para adj = true
+     dfs(1);
+
+
+
+-----------------------------------------------------------------------
+
+Algoritmo de Tarjan - componentes fortemente conexos
+
+   define: max
+ 
+   global:
+     int n, ind = 1;
+     bool adj[MAX][MAX], inS[MAX];
+     int num[MAX], low[MAX];
+     stack<int> s;
+     vector<int> cfc;
+
+   void dfs(int v) {
+     num[v] = low[v] = ind;
+     ind++;
+     s.push(v);
+     inS[v] = true;
+
+     for(int i = 1; i <= n; i++) {
+       if(adj[v][i]) {
+         if(num[i] == 0) {
+           dfs(i);
+           low[v] = min(low[v], low[i]);
+         } else if(inS[i]) {
+           low[v] = min(low[v], num[i]);
+         }
+       }
+     }
+
+     if(num[v] == low[v]) {
+       cfc.clear();
+       int w;
+       do {
+         w = s.top();
+         s.pop();
+         inS[v] = false;
+         cfc.push_back(w);
+       } while (w != v);
+       for(int i = 0; i < (int)cfc.size(); i++)
+         cout << cfc[i] << " ";
+       cout << "\n";
+     }
+   }
+
+   main:
+     ler valores para adj = true
+     for(int i = 1; i <= n; i++) {
+       if(num[i] == 0)
+         dfs(i);
+     }
+
+
+
+-----------------------------------------------------------------------
+
+C++
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int main() {
+   ios::sync_with_stdio(0);
+   cin.tie(0);
+
+   return 0;
+}
+
+
+apagar valores: memset(nome, valor(0 ou false), sizeof(nome));
